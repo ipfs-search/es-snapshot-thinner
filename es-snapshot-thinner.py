@@ -129,7 +129,7 @@ def main():
 
     # setupLogging(args.verbose)
 
-    es = Elasticsearch([ES_HOST], timeout=600)
+    es = Elasticsearch([ES_HOST], timeout=1200)
 
     print('Checking for running snapshot delete tasks...')
     res = es.tasks.list(actions='cluster:admin/snapshot/delete', group_by='parents')
@@ -182,6 +182,9 @@ def main():
         print('\nDoes this seem reasonable? (y/n)')
         if confirm():
             delete_snapshots(sorted(delete_names))
+
+            print('Cleaning up repository...')
+            es.snapshot.cleanup_repository(SNAPSHOT_REPO)
         else:
             print('kbye...')
     else:
