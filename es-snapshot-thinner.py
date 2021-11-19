@@ -5,8 +5,8 @@ import datetime
 from colorama import Fore, Back, Style
 from elasticsearch import Elasticsearch
 
-ES_HOST = 'http://10.200.200.3:9200/'
-SNAPSHOT_REPO = 'ipfs_disk'
+ES_HOST = 'http://127.0.0.1:9200/'
+SNAPSHOT_REPO = 'ipfs_wasabi'
 SNAPSHOT_PREFIX = "snapshot"
 
 
@@ -148,16 +148,18 @@ def main():
 
     # Filter sucessful
     success_snapshots = filter(lambda s: s['state'] == 'SUCCESS', snapshots)
-    # failed_snapshots = filter(lambda s: s['state'] != 'SUCCESS', snapshots)
-    # print('Found failed snapshots: ', ', '.join(failed_snapshots))
+    success_names = list(map(lambda s: s['snapshot'], success_snapshots))
 
-    names = list(map(lambda s: s['snapshot'], success_snapshots))
-    dates = set(map(name_to_date, names))
+    failed_snapshots = filter(lambda s: s['state'] != 'SUCCESS', snapshots)
+    failed_names = list(map(lambda s: s['snapshot'], failed_snapshots))
+    print('Found failed snapshots: ', ', '.join(failed_names))
 
+    dates = set(map(name_to_date, success_names))
     keepers = set(filter_dates(dates))
-
     keep_names = set(map(date_to_name, keepers))
-    delete_names = set(map(date_to_name, dates - keepers))
+
+    delete_names = set(map(date_to_name, dates - keepers) + failed_names)
+    # delete_names = failed_names
 
     if delete_names:
         # Nice coloured output
@@ -171,7 +173,7 @@ def main():
             assert False, "Name should either be in keepers or deleters."
 
         print('\nProposing to keep the items in green and to delete the items in red:')
-        display_names = list(map(colour_names, names))
+        display_names = list(map(colour_names, delete_names))
         for n in display_names:
             print(n)
 
