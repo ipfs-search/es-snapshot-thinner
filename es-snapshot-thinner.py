@@ -148,18 +148,20 @@ def main():
 
     # Filter sucessful
     success_snapshots = filter(lambda s: s['state'] == 'SUCCESS', snapshots)
-    success_names = list(map(lambda s: s['snapshot'], success_snapshots))
+    success_names = set(map(lambda s: s['snapshot'], success_snapshots))
 
     failed_snapshots = filter(lambda s: s['state'] != 'SUCCESS', snapshots)
-    failed_names = list(map(lambda s: s['snapshot'], failed_snapshots))
+    failed_names = set(map(lambda s: s['snapshot'], failed_snapshots))
     print('Found failed snapshots: ', ', '.join(failed_names))
 
     dates = set(map(name_to_date, success_names))
     keepers = set(filter_dates(dates))
     keep_names = set(map(date_to_name, keepers))
 
-    delete_names = set(map(date_to_name, dates - keepers) + failed_names)
-    # delete_names = failed_names
+    assert(keep_names)
+    print(keep_names)
+
+    delete_names = (success_names - keep_names) | failed_names
 
     if delete_names:
         # Nice coloured output
@@ -173,17 +175,25 @@ def main():
             assert False, "Name should either be in keepers or deleters."
 
         print('\nProposing to keep the items in green and to delete the items in red:')
-        display_names = list(map(colour_names, delete_names))
+        all_names = sorted(delete_names | keep_names)
+
+        assert len(all_names) == len(delete_names) + len(keep_names)
+
+        display_names = list(map(colour_names, all_names))
         for n in display_names:
             print(n)
 
         def delete_snapshots(l):
             print('Deleting snapshots:', ', '.join(l))
-            es.snapshot.delete(SNAPSHOT_REPO, l)
+
+            # TODO: Catch exceptions
+            # TODO: Increase timeout
+            # es.snapshot.delete(SNAPSHOT_REPO, l)
 
         print('\nDoes this seem reasonable? (y/n)')
         if confirm():
-            delete_snapshots(sorted(delete_names))
+            # TODO: FUUUU delete_names contains *all* repositories!!!!
+            # delete_snapshots(sorted(delete_names))
 
             print('Cleaning up repository...')
             es.snapshot.cleanup_repository(SNAPSHOT_REPO)
