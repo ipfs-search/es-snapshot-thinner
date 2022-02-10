@@ -186,14 +186,14 @@ def main():
         def delete_snapshots(l):
             print('Deleting snapshots:', ', '.join(l))
 
-            # TODO: Catch exceptions
-            # TODO: Increase timeout
-            # es.snapshot.delete(SNAPSHOT_REPO, l)
+            if confirm():
+                # TODO: Catch exceptions
+                # TODO: Increase timeout
+                es.snapshot.delete(SNAPSHOT_REPO, l)
 
         print('\nDoes this seem reasonable? (y/n)')
         if confirm():
-            # TODO: FUUUU delete_names contains *all* repositories!!!!
-            # delete_snapshots(sorted(delete_names))
+            delete_snapshots(sorted(delete_names))
 
             print('Cleaning up repository...')
             es.snapshot.cleanup_repository(SNAPSHOT_REPO)
