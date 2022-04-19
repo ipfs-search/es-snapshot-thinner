@@ -129,7 +129,7 @@ def main():
 
     # setupLogging(args.verbose)
 
-    es = Elasticsearch([ES_HOST], timeout=1200)
+    es = Elasticsearch([ES_HOST], timeout=3600) # One hour timeout
 
     print('Checking for running snapshot delete tasks...')
     res = es.tasks.list(actions='cluster:admin/snapshot/delete', group_by='parents')
