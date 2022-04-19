@@ -52,6 +52,9 @@ def filter_dates(dates):
     # This is the last of the dailies
     lastdaily = None
     lastmonthly = None
+
+    assert len(dates) > 0, "No succesful snapshots exist."
+
     earliest = dates[-1]
 
     print('Earliest:', earliest)
