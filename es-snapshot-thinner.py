@@ -6,7 +6,7 @@ from colorama import Fore, Back, Style
 from elasticsearch import Elasticsearch
 
 ES_HOST = 'http://127.0.0.1:9200/'
-SNAPSHOT_REPO = 'ipfs_wasabi'
+SNAPSHOT_REPO = 'filebase'
 SNAPSHOT_PREFIX = "snapshot"
 
 
